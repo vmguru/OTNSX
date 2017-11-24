@@ -4,20 +4,16 @@ import json
 import requests
 import ssl
 
+from config import *
+
 app = Flask(__name__)
 
 # --- Configuration - modify this ---
-OTNSX_CONFIG = {}
-# vCenter credentials
-OTNSX_CONFIG['VC_HOST'] = "vcenter"
-OTNSX_CONFIG['VC_USER'] = "otrs@vsphere.local"
-OTNSX_CONFIG['VC_PASS'] = "P@ssw0rd"
-# NSX Manager credentials
-OTNSX_CONFIG['NSX_HOST'] = "nsx-manager"
-OTNSX_CONFIG['NSX_USER'] = "admin"
-OTNSX_CONFIG['NSX_PASS'] = "P@ssw0rd"
-# The NSX Security Tag we're tagging and untagging VMs with (the maintenance security tag)
-OTNSX_CONFIG['NSX_SECURITYTAG'] = "securitytag-12"
+
+
+
+
+
 # --- Stop modifying here ---
 
 # Global variable to store the authentication token vCenter gives an API client to execute API calls
@@ -84,9 +80,13 @@ def index():
     json_temp = json.loads(request.data)
     print json_temp['TicketID']
 
-    URL = 'http://192.168.178.215/otrs/nph-genericinterface.pl/Webservice/GenericTicketConnectorREST/Ticket/'
-    URL += json_temp['TicketID']
-    URL += '?UserLogin=sander&Password=vmware&DynamicFields=True'
+    URL = '%s://%s/otrs/nph-genericinterface.pl/Webservice/GenericTicketConnectorREST/Ticket/' \
+          '%s?UserLogin=%s&Password=%s&DynamicFields=True' % (
+                    OTNSX_CONFIG['OTRS_PROTOCOL'],
+                    OTNSX_CONFIG['OTRS_HOST'],
+                    json_temp['TicketID'],
+                    OTNSX_CONFIG['OTRS_USER'],
+                    OTNSX_CONFIG['OTRS_PASS'])
 
     requestGet = requests.get(URL)
 
@@ -95,7 +95,7 @@ def index():
     #print rj['Ticket'][0]['Title']
     #print rj['Ticket'][0]['Lock']
     #print rj['Ticket'][0]['DynamicField'][11]['Value']
-    vmNAME = requestJson['Ticket'][0]['DynamicField'][11]['Value']
+    vmNAME = requestJson['Ticket'][0]['DynamicField'][OTNSX_CONFIG['OTRS_DYNAMICFIELD']]['Value']
 
     vmID = getVMID(vmNAME)
     print "VM ID na de def = %s" % vmID
@@ -103,7 +103,7 @@ def index():
     if rj['Ticket'][0]['Lock'] == "lock":
         putSecurityTag (vmID)
     else:
-        removeSecurityTag (vmID)
+        removeSecurityTag(vmID)
 
     return vmID
 
