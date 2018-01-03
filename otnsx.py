@@ -8,14 +8,6 @@ from config import *
 
 app = Flask(__name__)
 
-# --- Configuration - modify this ---
-
-
-
-
-
-# --- Stop modifying here ---
-
 # Global variable to store the authentication token vCenter gives an API client to execute API calls
 # (instead of having to post credentials each call)
 VC_AUTH_TOKEN = ""
@@ -91,16 +83,13 @@ def index():
     requestGet = requests.get(URL)
 
     requestJson = requestGet.json()
-
-    #print rj['Ticket'][0]['Title']
-    #print rj['Ticket'][0]['Lock']
-    #print rj['Ticket'][0]['DynamicField'][11]['Value']
+   
     vmNAME = requestJson['Ticket'][0]['DynamicField'][OTNSX_CONFIG['OTRS_DYNAMICFIELD']]['Value']
 
     vmID = getVMID(vmNAME)
     print "VM ID na de def = %s" % vmID
 
-    if rj['Ticket'][0]['Lock'] == "lock":
+    if requestJson['Ticket'][0]['Lock'] == "lock":
         putSecurityTag (vmID)
     else:
         removeSecurityTag(vmID)
