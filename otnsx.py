@@ -70,7 +70,7 @@ def removeSecurityTag(vmID):
 @app.route('/', methods=['POST'])
 def index():
     json_temp = json.loads(request.data)
-    print json_temp['TicketID']
+    print(json_temp['TicketID'])
 
     URL = '%s://%s/otrs/nph-genericinterface.pl/Webservice/GenericTicketConnectorREST/Ticket/' \
           '%s?UserLogin=%s&Password=%s&DynamicFields=True' % (
@@ -87,7 +87,7 @@ def index():
     vmNAME = requestJson['Ticket'][0]['DynamicField'][OTNSX_CONFIG['OTRS_DYNAMICFIELD']]['Value']
 
     vmID = getVMID(vmNAME)
-    print "VM ID na de def = %s" % vmID
+    print("VM ID na de def = %s" % vmID)
 
     if requestJson['Ticket'][0]['Lock'] == "lock":
         putSecurityTag (vmID)
